@@ -67,7 +67,11 @@ app.use(bodyParser.urlencoded({extended: true}));
     let key = generateRandomString();
     res.send({key});
   });
-  
+  app.post("/urls/:shortURL/delete", (req, res) => {
+    let key = req.params.shortURL
+    delete urlDatabase[key];
+    res.redirect("/urls");
+  });
 
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
