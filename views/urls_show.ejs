@@ -6,7 +6,7 @@
   <title>URL - TinyApp Example</title>
 </head>
 <header>
-    <nav class="navbar navbar-expand-md navbar-dark bg-success">
+    <nav class="navbar navbar-expand-md navbar-dark bg-dark">
       <a class="navbar-brand" href="/urls">TinyApp</a>
       <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavAltMarkup" aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
         <span class="navbar-toggler-icon"></span>
@@ -24,10 +24,18 @@
   <div class="card text-center">
       <div class="card-header"></div>
       <div class="card-body">
-        <h5 class="card-title">TinyURL for: <%= longURL %></h5>
+        <h5 class="card-title">TinyURL for:<%= longURL %></h5>
         <p class="card-text">Short URL: <a href="/u/<%= shortURL %>"><%= shortURL %></a></p>
       </div>
-    <div class="card-footer text-muted"></div>
+    <div class="card-footer text-muted">
+      <h5 class = "text-muted">EDIT</h5>
+      
+      <form method="POST" action="/urls/<%= shortURL %>/edit" >
+        <label>New URL:</label>
+        <input type="text" name="newlongURL" placeholder = <%= longURL %>/>
+        <button class="btn btn-primary" type="submit">submit</button>
+      </form>
+    </div>
   </div>
   <!-- Bootstrap JS -->
   <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
