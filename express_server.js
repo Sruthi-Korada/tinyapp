@@ -10,6 +10,7 @@ const urlDatabase = {
   "b2xVn2": "http://www.lighthouselabs.ca",
   "9sm5xK": "http://www.google.com"
 };
+//-------------------------------------------middleware ------------------------------------------------------------//
 //-----------------body parser------------------------//
 
 const bodyParser = require("body-parser");
@@ -20,7 +21,20 @@ const cookieParser = require("cookie-parser");
 app.use(cookieParser())
 
 
-//---------------------------------random fuction used in post urls-----------------//
+//------------------------USER OBJECT---------------------------//
+const users = { 
+  "userRandomID": {
+    id: "userRandomID", 
+    email: "user@example.com", 
+    password: "purple-monkey-dinosaur"
+  },
+ "user2RandomID": {
+    id: "user2RandomID", 
+    email: "user2@example.com", 
+    password: "dishwasher-funk"
+  }
+}
+//---------------------------------random fuction used in post urls   and GLOBAL FUNCTION-----------------//
 
 function generateRandomString() {
   var text = "";
@@ -30,42 +44,35 @@ function generateRandomString() {
     }
     return text;
   }
-//------------------ GET METHOD ------------------------------------------------
+  function checkPassword(email, password) {
+    for (let user in users) {
+      if (users[user].email === email && users[user].password === password) {
+        return users[user].id;
+      }
+    }
+  }
+
+  const emailExists = function (email, users) {
+    for (const user in users) {
+      if (users[user]['email'] === email) {
+        return true;
+      }
+    }
+    return false;
+  };
 
 
+//------------------ GET METHOD ----------------------------------------------------------------------------------
 
-// app.get("/", (req, res) => {
-//   res.send("Hello!");
-// });
-// app.get("/urls.json", (req, res) => {                            // commented code are routes for the server
-//     res.json(urlDatabase);
-//   });
- 
-  // app.get("/set", (req, res) => {
-  //   const a = 1;
-  //   res.send(`a = ${a}`);
-  //  });
-   
-  //  app.get("/fetch", (req, res) => {
-  //   res.send(`a = ${a}`);
-  //  })
-  // app.get("/hello", (req, res) => {
-  //   let templateVars = { greeting: 'Hello World!' };
-  //   res.render("hello_world", templateVars);
-  // });
-  //  app.get("/urls", (req, res) => {
-  //   let templateVars = { urls: urlDatabase };
-  //   res.render("urls_index", templateVars);
-  //  });
    app.get("/urls/new", (req, res) => {
     let templateVars = {
-      username: req.cookies["username"]
+      user_id : req.cookies['user_id']
     };
     res.render("urls_new", templateVars);                  // ====> giving new url ejs "adding new html css attribute"
   });
   app.get("/urls/:shortURL", (req, res) => {
     let templateVars = { shortURL: req.params.shortURL, longURL:urlDatabase[req.params.shortURL] ,
-      username : req.cookies["username"] };
+      user_id : req.cookies['user_id'] };
     res.render("urls_show", templateVars );
   });
 
@@ -73,19 +80,24 @@ function generateRandomString() {
    const longURL = urlDatabase[req.params.shortURL]
     res.redirect(longURL);
   });
-  app.get("/urls", (req,res) => {
-    let templateVars = {  username : req.cookies["username"],
-                          urls : urlDatabase };
-    res.render('urls_index', templateVars);
-  });
+ 
 
 
-  // -------------------------------POST METHOD ---------------------------------------
+
+  // -------------------------------URLS -----------------------------------------------------------------//
 
   // app.post("/urls", (req, res) => {
   //   console.log(req.body);  // Log the POST request body to the console
   //   res.send("Ok");         // Respond with 'Ok' (we will replace this)
   // });
+  
+  app.get("/urls", (req,res) => {
+    let passData = {
+      user_id : req.cookies['user_id'],
+      urls : urlDatabase
+                    };
+    res.render('urls_index', passData);
+  });
   app.post("/urls", (req, res) => {
     shortURL = generateRandomString();
     longURL = req.body.longURL;
@@ -120,23 +132,60 @@ app.post("/urls/:shortURL/edit", (req, res) => {
 
 
 //--------------------login-------------------------------//
-app.post("/login", (req, res) => {
-  console.log(req.body.userName);
-  res.cookie("username",req.body.username);
-  res.redirect("/urls");
+
+
+app.get('/login', (req, res) => {
+  let passData = {
+    user_id : req.cookies['user_id'],
+    urls : urlDatabase
+                  };
+  res.render('login.ejs', passData);
 });
 
-
-
-
+  app.post("/login", (req, res) => {
+    console.log(req.cookies);
+    let userID = checkPassword(req.body.email, req.body.password);
+    if (userID) {
+      res.cookie(`user_id`, userID);
+    } else {
+      res.status(403).send(`Error 403 - Email/ Password entered is not valid!`);
+    }
+    res.redirect("/urls");
+  });
 //---------------------logout----------//
 
-app.post("/logout", (req, res) => {
-  res.clearCookie('username');
-  // res.cookie("username",req.body.username);
+app.get("/logout", (req, res) => {
+  res.clearCookie("user_id");
   res.redirect("/urls");
 });
 
+//----------------------------  REGISTER -------------------//
+app.get("/register", (req, res) => {
+  let passData = {
+    user_id : req.cookies['user_id'],
+    urls : urlDatabase
+                  };
+  res.render("register",passData);
+});
+
+
+
+app.post("/register", (req, res) => {
+  if (emailExists(req.body.email, users)) {
+    res.statusCode = 400;
+    res.send("Email already exists!")
+  } else {
+    if (req.body.email === "" || req.body.password === "") {
+      res.statusCode = 400;
+      res.send("Please fill in both email and password to log in.")
+    } else {
+      const id = generateRandomString();
+      users[id] = { id: id, email: req.body.email, password:req.body.password };
+      res.cookie("user_id", id);
+      res.redirect("/urls");
+    }
+  }
+});
 //------------------------- LISTEN ---------------------------
 
 
