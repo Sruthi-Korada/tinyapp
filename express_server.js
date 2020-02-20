@@ -19,7 +19,7 @@ app.use(cookieSession({
   maxAge: 24 * 60 * 60 * 1000
 }));
 app.set("view engine", "ejs");
-//------------------------OBJECTs---------------------------//
+//------------------------OBJECTs---------------------------------------------------------------------------//
 const urlDatabase = {
   b6UTxQ: { longURL: "https://www.tsn.ca", userID: "aJ48lW" },
   i3BoGr: { longURL: "https://www.google.ca", userID: "aJ48lW" }
@@ -42,7 +42,7 @@ const users = {
   }
 };
 
-//------------------------/----------------------------------------------------------------------------//
+//------------------------localhost"/"----------------------------------------------------------------------------//
 app.get("/", function(req, res) {
   let cookie = req.session;
   let templateVars = {urls: isUsersLink(urlDatabase, cookie.user_id), user: users[cookie.user_id]};
@@ -56,7 +56,7 @@ app.get("/", function(req, res) {
 
 app.get("/urls", function(req, res) {
   let cookie = req.session;
-  console.log("urls with id: ",cookie,users[cookie.user_id]);
+  // console.log("urls with id: ",cookie,users[cookie.user_id]);
   let templateVars = {urls: isUsersLink(urlDatabase, cookie.user_id), user: users[cookie.user_id]};
   res.render("urls_index", templateVars);
 });
@@ -69,7 +69,7 @@ app.post("/urls", (req, res) => {
     longURL: req.body.longURL,
     userID: cookie.user_id
   };
-  console.log("for urls post :", urlDatabase);
+  // console.log("for urls post :", urlDatabase);
   res.redirect(`/urls/${genshortURL}`);
 });
 
@@ -139,9 +139,9 @@ app.get("/login", (req, res) => {
 });
 app.post("/login", function(req, res) {
   let userID = getUserByEmail(req.body.email,users);
-  console.log("post login :",req.body);
+  // console.log("post login :",req.body);
   let passwordCheck = checkPassword(req.body.email, req.body.password, users);
-console.log("loginpwsck :",passwordCheck);
+  // console.log("loginpwsck :",passwordCheck);
   if (userID && passwordCheck) {
     // res.cookie(`user_id`, userID);
     req.session.user_id = userID;
@@ -184,9 +184,11 @@ app.post("/register", function(req, res) {
       password: hasedPassword
     };
   }
-  console.log(users);
+  // console.log(users);
   res.redirect("/login");
 });
+
+
 //------------------------- LISTEN ---------------------------
 
 

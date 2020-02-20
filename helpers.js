@@ -13,21 +13,21 @@ function generateRandomString() {
   
 // //-----returns true if email already exists in database-------
 function getUserByEmail(email, users) {
-   for (let user in users) {
-     if (users[user].email === email) {
-       return users[user].id;
-     }
-   }
-   return false;
- }
+  for (let user in users) {
+    if (users[user].email === email) {
+      return users[user].id;
+    }
+  }
+  return false;
+}
 
 //-------------------check password-----------------
 function checkPassword(email, password, users) {
-  console.log("checkpsw function",email,password,users);
+  // console.log("checkpsw function",email,password,users);
 
   for (let user in users) {
     if (users[user].email === email) {
-      console.log(email,password,user);
+      // console.log(email,password,user);
       return bcrypt.compareSync(password, users[user].password);
     }
   }
@@ -38,7 +38,7 @@ function checkPassword(email, password, users) {
 function isUsersLink(object, id) {
   let returned = {};
   for (let obj in object) {
-    if (object[obj].userID == id) {
+    if (object[obj].userID === id) {
       returned[obj] = object[obj];
     }
   }
