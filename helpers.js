@@ -1,60 +1,48 @@
-const getUserByEmail = function(email, users, select) { //gets pass or userid by email
-    const userKeys = Object.keys(users);
-    let usr = undefined;
-    let pass = undefined;
-    for (let user of userKeys) {
-      if (users[user].email === email) {
-        usr = users[user].id;
-        pass = users[user].password;
-      }
-    }
-    switch (select) {
-      case 1:
-        return usr;
-        break;
-      case 2:
-        return pass;
-        break;
-      default:
-        return usr;
-    }
-  };
+
+const bcrypt = require("bcrypt");
+
+//-------function returns a string of 6 alphanumeric characters---------
+function generateRandomString() {
+  let rString = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
+  let result = '';
+  for (let i = 0; i < 6; i++) {
+    result += rString[Math.floor(Math.random() * rString.length)];
+  }
+  return result;
+}
   
-  function generateRandomString(n) {
-    const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-    let short = '';
-    for (let i = 0; i < n; i++) {
-      const random = Math.floor(Math.random() * 62);
-      short += chars[random];
+// //-----returns true if email already exists in database-------
+function getUserByEmail(email, users) {
+   for (let user in users) {
+     if (users[user].email === email) {
+       return users[user].id;
+     }
+   }
+   return false;
+ }
+
+//-------------------check password-----------------
+function checkPassword(email, password, users) {
+  console.log("checkpsw function",email,password,users);
+
+  for (let user in users) {
+    if (users[user].email === email) {
+      console.log(email,password,user);
+      return bcrypt.compareSync(password, users[user].password);
     }
-    return short;
-  };
-  // check if email exist in database
-  const checkEmail = function(email, users) {
-    const usersKey = Object.keys(users);
-    // console.log(usersKey," <---> ",email);
-    // const getEmail = users.find(emailFound => users[id].email === email);
-    for (let user of usersKey) {
-      // console.log(user, " email = ", users[user].email);
-      if (users[user].email === email) {
-        return true;
-      } else {
-        // console.log('content user[user].email = ', users[user].email);
-        // return false;
-      }
+  }
+}
+
+//------------------- isUserLink-------------------//
+//check if link belongs to user
+function isUsersLink(object, id) {
+  let returned = {};
+  for (let obj in object) {
+    if (object[obj].userID == id) {
+      returned[obj] = object[obj];
     }
-    return false;
-  };
-  
-  const urlsForUser = function(id, urlDatabase) {
-    const urlsKeys = Object.keys(urlDatabase);
-    let tempVars = {};
-    for (let url of urlsKeys) {
-      if (urlDatabase[url].userID === id) {
-        tempVars[url] = urlDatabase[url].longURL;
-      }
-    }
-    return tempVars;
-  };
-  
-  module.exports = { getUserByEmail, generateRandomString, checkEmail, urlsForUser }
+  }
+  return returned;
+}
+
+module.exports = {getUserByEmail, checkPassword, isUsersLink, generateRandomString};

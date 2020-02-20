@@ -4,7 +4,7 @@ const PORT = 8080; // default port 8080
 const bodyParser = require("body-parser");
 const cookieSession = require("cookie-session");
 const bcrypt = require("bcrypt");
-
+const {getUserByEmail, checkPassword, isUsersLink, generateRandomString} = require("./helpers");
 
 
 
@@ -35,56 +35,13 @@ const users = {
     email: "user2@example.com",
     password: bcrypt.hashSync("dishwasher-funk",10)
   },
-  "user2RandomID": {
+  "user3RandomID": {
     id: "user3RandomID",
     email: "sruthikorada36@gmail.com",
     password: bcrypt.hashSync("zxcvbnm",10)
   }
 };
-//---------------------------------random fuction used in post urls   and GLOBAL FUNCTION-----------------//
 
-
-//-------function returns a string of 6 alphanumeric characters---------
-function generateRandomString() {
-  let rString = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
-  let result = '';
-  for (let i = 0; i < 6; i++) {
-    result += rString[Math.floor(Math.random() * rString.length)];
-  }
-  return result;
-}
-  
-//-----returns true if email already exists in database-------
-function checkUserEmail(email) {
-  for (let user in users) {
-    if (users[user].email === email) {
-      return users[user].id;
-    }
-  }
-  return false;
-}
-
-//-------------------check password-----------------
-function checkPassword(email, password) {
-  for (let user in users) {
-    if (users[user].email === email) {
-      console.log(email,password,user);
-      return bcrypt.compareSync(password, users[user].password);
-    }
-  }
-}
-
-//------------------- isUserLink-------------------//
-//check if link belongs to user
-function isUsersLink(object, id) {
-  let returned = {};
-  for (let obj in object) {
-    if (object[obj].userID == id) {
-      returned[obj] = object[obj];
-    }
-  }
-  return returned;
-}
 //------------------------/----------------------------------------------------------------------------//
 app.get("/", function(req, res) {
   let cookie = req.session;
@@ -99,6 +56,7 @@ app.get("/", function(req, res) {
 
 app.get("/urls", function(req, res) {
   let cookie = req.session;
+  console.log("urls with id: ",cookie,users[cookie.user_id]);
   let templateVars = {urls: isUsersLink(urlDatabase, cookie.user_id), user: users[cookie.user_id]};
   res.render("urls_index", templateVars);
 });
@@ -111,7 +69,7 @@ app.post("/urls", (req, res) => {
     longURL: req.body.longURL,
     userID: cookie.user_id
   };
-  console.log(urlDatabase);
+  console.log("for urls post :", urlDatabase);
   res.redirect(`/urls/${genshortURL}`);
 });
 
@@ -180,18 +138,19 @@ app.get("/login", (req, res) => {
   res.render("login", {user: users[cookie.user_id]});
 });
 app.post("/login", function(req, res) {
-  let userID = checkUserEmail(req.body.email);
-  console.log(req.body);
-  let passwordCheck = checkPassword(req.body.email, req.body.password);
-
+  let userID = getUserByEmail(req.body.email,users);
+  console.log("post login :",req.body);
+  let passwordCheck = checkPassword(req.body.email, req.body.password, users);
+console.log("loginpwsck :",passwordCheck);
   if (userID && passwordCheck) {
     // res.cookie(`user_id`, userID);
     req.session.user_id = userID;
     req.session.save();
+    res.redirect("/urls");
   } else {
     res.status(403).send(`Error 403 - Email/ Password entered is not valid!`);
   }
-  res.redirect("/urls");
+  
 });
 //---------------------logout----------//
 
@@ -209,18 +168,20 @@ app.get("/register", (req, res) => {
 });
 
 app.post("/register", function(req, res) {
+  
   //if email already in use
   if (req.body.email === "" || req.body.password === "") {
     res.status(400).send(`Error 400 - Email or password needs to be entered!`);
   //if email or password
-  } else if (checkUserEmail(req.body.email)) {
+  } else if (getUserByEmail(req.body.email)) {
     res.status(400).send(`Error 400 - That email is already in use!`);
   } else {
+    const hasedPassword = bcrypt.hashSync(req.body.password, 8);
     let userID = generateRandomString();
     users[userID] = {
       id: userID,
       email: req.body.email,
-      password: bcrypt.hashSync(req.body.password, 8)
+      password: hasedPassword
     };
   }
   console.log(users);
