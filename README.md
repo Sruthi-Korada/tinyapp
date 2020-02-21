@@ -4,14 +4,14 @@ TinyApp is a full stack web application built with Node and Express that allows 
 
 ## Task Completed
 
-[x] URL shortening
-[x] installing nodemon
-[x] Deleting Urls
-[x] Updating Urls
-[x] Using cookies in Express
-[x] User Registration
-[x] Encrypted Cookies 
-[x] Testing Helper Function
+- [x] URL shortening
+- [x] installing nodemon
+- [x] Deleting Urls
+- [x] Updating Urls
+- [x] Using cookies in Express
+- [x] User Registration
+- [x] Encrypted Cookies 
+- [x] Testing Helper Function
 
 ## Final Product
 
