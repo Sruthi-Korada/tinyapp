@@ -56,20 +56,16 @@ app.get("/", function(req, res) {
 
 app.get("/urls", function(req, res) {
   let cookie = req.session;
-  // console.log("urls with id: ",cookie,users[cookie.user_id]);
   let templateVars = {urls: isUsersLink(urlDatabase, cookie.user_id), user: users[cookie.user_id]};
   res.render("urls_index", templateVars);
 });
 app.post("/urls", (req, res) => {
   let cookie = req.session;
-  // console.log(req.body);  // Log the POST request body to the console
-  // res.send("Ok");         // Respond with 'Ok' (we will replace this)
   const genshortURL = generateRandomString();
   urlDatabase[genshortURL] = {
     longURL: req.body.longURL,
     userID: cookie.user_id
   };
-  // console.log("for urls post :", urlDatabase);
   res.redirect(`/urls/${genshortURL}`);
 });
 
@@ -96,7 +92,6 @@ app.post("/urls/:shortURL", (req, res) => {
 });
 app.get("/u/:shortURL", function(req, res) {
   let shortURL = req.params.shortURL;
-  // console.log("u/short", shortURL, urlDatabase[shortURL])
   res.redirect("https://" + urlDatabase[shortURL].longURL);
 });
 //-----------------DELETE --------------------------------//
@@ -140,11 +135,8 @@ app.get("/login", (req, res) => {
 });
 app.post("/login", function(req, res) {
   let userID = getUserByEmail(req.body.email,users);
-  // console.log("post login :",req.body);
   let passwordCheck = checkPassword(req.body.email, req.body.password, users);
-  // console.log("loginpwsck :",passwordCheck);
   if (userID && passwordCheck) {
-    // res.cookie(`user_id`, userID);
     req.session.user_id = userID;
     req.session.save();
     res.redirect("/urls");
@@ -156,7 +148,6 @@ app.post("/login", function(req, res) {
 //---------------------logout----------//
 
 app.post("/logout", function(req, res) {
-  // console.log(req.cookies);
   req.session = null;
   res.redirect("/urls");
 });
@@ -169,9 +160,8 @@ app.get("/register", (req, res) => {
 });
 
 app.post("/register", function(req, res) {
-  
   //if email already in use
-  if (req.body.email === "" || req.body.password === "") {
+   if (req.body.email === "" || req.body.password === "") {
     res.status(400).send(`Error 400 - Email or password needs to be entered!`);
   //if email or password
   } else if (getUserByEmail(req.body.email)) {
@@ -185,7 +175,6 @@ app.post("/register", function(req, res) {
       password: hasedPassword
     };
   }
-  // console.log(users);
   res.redirect("/login");
 });
 
