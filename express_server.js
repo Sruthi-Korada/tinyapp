@@ -96,7 +96,7 @@ app.post("/urls/:shortURL", (req, res) => {
 });
 app.get("/u/:shortURL", function(req, res) {
   let shortURL = req.params.shortURL;
-  console.log("u/short", shortURL, urlDatabase[shortURL])
+  // console.log("u/short", shortURL, urlDatabase[shortURL])
   res.redirect("https://" + urlDatabase[shortURL].longURL);
 });
 //-----------------DELETE --------------------------------//
