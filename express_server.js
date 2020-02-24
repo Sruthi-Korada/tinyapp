@@ -1,4 +1,4 @@
-const express = require("express");
+const express = require("express"); //initialize express
 const app = express();
 const PORT = 8080; // default port 8080
 const bodyParser = require("body-parser");
@@ -18,12 +18,13 @@ app.use(cookieSession({
   keys:["poop"],
   maxAge: 24 * 60 * 60 * 1000
 }));
-app.set("view engine", "ejs");
+app.set("view engine", "ejs");  //set ejs as the view engine
 //------------------------OBJECTs---------------------------------------------------------------------------//
 const urlDatabase = {
-  b6UTxQ: { longURL: "https://www.tsn.ca", userID: "aJ48lW" },
+  b6UTxQ: { longURL: "https://www.tsn.ca", userID: "aJ48lW" },      //all long urls and their generated short URLs
   i3BoGr: { longURL: "https://www.google.ca", userID: "aJ48lW" }
 };
+//all users (from registration page)
 const users = {
   "userRandomID": {
     id: "userRandomID",
@@ -43,6 +44,7 @@ const users = {
 };
 
 //------------------------localhost"/"----------------------------------------------------------------------------//
+// Homepage takes you to your urls if you are logged in or to the login page:
 app.get("/", function(req, res) {
   let cookie = req.session;
   let templateVars = {urls: isUsersLink(urlDatabase, cookie.user_id), user: users[cookie.user_id]};
@@ -53,7 +55,7 @@ app.get("/", function(req, res) {
   }
 });
 // -------------------------------URLS -----------------------------------------------------------------//
-
+// Urls page showing user's generated short/ long URLs:
 app.get("/urls", function(req, res) {
   let cookie = req.session;
   let templateVars = {urls: isUsersLink(urlDatabase, cookie.user_id), user: users[cookie.user_id]};
@@ -70,6 +72,7 @@ app.post("/urls", (req, res) => {
 });
 
 //------------------------NEW URL-----------------//
+// Generate a new short URL from a long URL
 app.get("/urls/new", function(req, res) {
   let cookie = req.session;
   //check if user is logged in
@@ -80,6 +83,8 @@ app.get("/urls/new", function(req, res) {
   }
 });
 //------------------------ URL WITH ID----------------------//
+
+// Short url visitors log
 app.get("/urls/:shortURL", function(req, res) {
   let cookie = req.session;
   let shortURL = req.params.shortURL;
@@ -127,14 +132,17 @@ app.post("/urls/:shortURL/edit", (req, res) => {
 });
   
 //--------------------login-------------------------------//
-
+// Login page
 
 app.get("/login", (req, res) => {
   let cookie = req.session;
   res.render("login", {user: users[cookie.user_id]});
 });
+
 app.post("/login", function(req, res) {
-  let userID = getUserByEmail(req.body.email,users);
+    // if email and password are valid, set the cookie's user_id
+  // console.log(req.cookies);
+  let userID = getUserByEmail(req.body.email,users);//returns user id
   let passwordCheck = checkPassword(req.body.email, req.body.password, users);
   if (userID && passwordCheck) {
     req.session.user_id = userID;
@@ -148,12 +156,13 @@ app.post("/login", function(req, res) {
 //---------------------logout----------//
 
 app.post("/logout", function(req, res) {
+    //only clear the user_id cookie, not the browser
   req.session = null;
   res.redirect("/urls");
 });
 
 //----------------------------  REGISTER -------------------//
-
+// register page
 app.get("/register", (req, res) => {
   let cookie = req.session;
   res.render("register", {user: users[cookie.user_id]});
