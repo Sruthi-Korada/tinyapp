@@ -100,6 +100,7 @@ app.get("/u/:shortURL", function(req, res) {
   res.redirect("https://" + urlDatabase[shortURL].longURL);
 });
 //-----------------DELETE --------------------------------//
+// when the delete button on the show URL page is pressed
 app.post("/urls/:shortURL/delete", (req, res) => {
   let short = req.params.shortURL;
   let cookie = req.session;
